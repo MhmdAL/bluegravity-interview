@@ -4,8 +4,19 @@ using UnityEngine;
 
 public class ShopKeeper : Interactable
 {
+    [SerializeField] private DialogData shopKeeperDialog;
+
+    private DialogBox _dialogBox;
+
+    private void Awake()
+    {
+        _dialogBox = FindObjectOfType<DialogBox>(true);
+    }
+
     public override void Interact(Player p)
     {
-        print("Howdy player");
+        Time.timeScale = 0;
+        
+        _dialogBox.Reset(shopKeeperDialog);
     }
 }

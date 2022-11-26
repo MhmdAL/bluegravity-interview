@@ -16,8 +16,9 @@ public class Player : MonoBehaviour
     public List<ItemData> Items;
 
     public SpriteRenderer HatRenderer;
-    public SpriteRenderer ArmorRenderer;
+    public SpriteRenderer WeaponRenderer;
     private ItemData _currentHat;
+    private ItemData _currentWeapon;
 
     private Interactable _nearestInteractable;
     public Interactable NearestInteractable
@@ -32,34 +33,81 @@ public class Player : MonoBehaviour
 
             _nearestInteractable = value;
 
-            if(shouldNotify)
+            if (shouldNotify)
                 NearestInteractableChanged?.Invoke(value);
         }
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            var hatIndex = Items.IndexOf(_currentHat);
-            if (hatIndex != -1)
-            {
-                hatIndex = (hatIndex + 1) % Items.Count;
-                var hat = Items[hatIndex];
-
-                Equip(hat);
-            }
-            else
-            {
-                Equip(Items.First());
-            }
-        }
+        HandleHatCycleInput();
+        HandleWeaponCycleInput();
 
         FindNearestInteractable();
 
         if (NearestInteractable != null && Input.GetKeyDown(KeyCode.F))
         {
             NearestInteractable.Interact(this);
+        }
+    }
+
+    private void HandleHatCycleInput()
+    {
+        var isRightArrowDown = Input.GetKeyDown(KeyCode.RightArrow);
+        var isLeftArrowDown = Input.GetKeyDown(KeyCode.LeftArrow);
+
+        if (isRightArrowDown || isLeftArrowDown)
+        {
+            var hats = Items.Where(x => x.Type == ItemType.Hat).ToList();
+            if (hats.Count == 0)
+                return;
+
+            var hatIndex = hats.IndexOf(_currentHat);
+            if (hatIndex == -1)
+            {
+                hatIndex = isRightArrowDown ? 0 : hats.Count - 1;
+            }
+            else if (isRightArrowDown)
+            {
+                hatIndex = (hatIndex + 1) % hats.Count;
+            }
+            else
+            {
+                hatIndex = hatIndex - 1 >= 0 ? hatIndex - 1 : hats.Count - 1;
+            }
+
+            var hat = hats[hatIndex];
+            Equip(hat);
+        }
+    }
+
+    private void HandleWeaponCycleInput()
+    {
+        var isUpArrowDown = Input.GetKeyDown(KeyCode.UpArrow);
+        var isDownArrowDown = Input.GetKeyDown(KeyCode.DownArrow);
+
+        if (isUpArrowDown || isDownArrowDown)
+        {
+            var weapons = Items.Where(x => x.Type == ItemType.Weapon).ToList();
+            if (weapons.Count == 0)
+                return;
+
+            var weaponIndex = weapons.IndexOf(_currentWeapon);
+            if (weaponIndex == -1)
+            {
+                weaponIndex = isUpArrowDown ? 0 : weapons.Count - 1;
+            }
+            else if (isUpArrowDown)
+            {
+                weaponIndex = (weaponIndex + 1) % weapons.Count;
+            }
+            else
+            {
+                weaponIndex = weaponIndex - 1 >= 0 ? weaponIndex - 1 : weapons.Count - 1;
+            }
+
+            var weapon = weapons[weaponIndex];
+            Equip(weapon);
         }
     }
 
@@ -100,7 +148,14 @@ public class Player : MonoBehaviour
 
     private void Equip(ItemData item)
     {
-        _currentHat = item;
+        if (item.Type == ItemType.Hat)
+        {
+            _currentHat = item;
+        }
+        else if (item.Type == ItemType.Weapon)
+        {
+            _currentWeapon = item;
+        }
 
         UpdateVisuals();
     }
@@ -131,18 +186,8 @@ public class Player : MonoBehaviour
 
     private void UpdateVisuals()
     {
-        if (_currentHat == null)
-            return;
+        HatRenderer.sprite = _currentHat?.Sprite ?? null;
 
-        if (_currentHat.Type == ItemType.Hat)
-        {
-            HatRenderer.sprite = _currentHat?.Sprite ?? null;
-            ArmorRenderer.sprite = null;
-        }
-        else if (_currentHat.Type == ItemType.Armor)
-        {
-            HatRenderer.sprite = null;
-            ArmorRenderer.sprite = _currentHat?.Sprite ?? null;
-        }
+        WeaponRenderer.sprite = _currentWeapon?.Sprite ?? null;
     }
 }

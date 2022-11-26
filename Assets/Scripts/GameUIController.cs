@@ -9,6 +9,10 @@ public class GameUIController : MonoBehaviour
 {
     public Player Player;
 
+    public string PurchaseButtonUnownedText;
+    public string PurchaseButtonOwnedText;
+    public string InteractionStringFormat;
+
     public TextMeshProUGUI InteractionText;
     public TextMeshProUGUI GoldText;
 
@@ -16,6 +20,9 @@ public class GameUIController : MonoBehaviour
     public TextMeshProUGUI ItemNameText;
     public TextMeshProUGUI ItemTypeText;
     public TextMeshProUGUI ItemPriceText;
+
+    public Button PurchaseButton;
+    public TextMeshProUGUI PurchaseButtonText;
 
     public GameObject PurchaseMenu;
     private ItemData _currentItem;
@@ -35,7 +42,7 @@ public class GameUIController : MonoBehaviour
         if (interactable != null && PurchaseMenu.activeSelf == false)
         {
             InteractionText.gameObject.SetActive(true);
-            InteractionText.text = $"Press F to interact ({interactable.InteractionDisplayName})";
+            InteractionText.text = string.Format(InteractionStringFormat, interactable.InteractionDisplayName);
         }
         else
         {
@@ -53,6 +60,17 @@ public class GameUIController : MonoBehaviour
         ItemNameText.text = item.DisplayName;
         ItemTypeText.text = item.Type.ToString();
         ItemPriceText.text = item.Price.ToString();
+
+        if (Player.Items.Contains(item))
+        {
+            PurchaseButton.interactable = false;
+            PurchaseButtonText.text = PurchaseButtonOwnedText;
+        }
+        else
+        {
+            PurchaseButton.interactable = true;
+            PurchaseButtonText.text = PurchaseButtonUnownedText;
+        }
 
         PurchaseMenu.SetActive(true);
 
