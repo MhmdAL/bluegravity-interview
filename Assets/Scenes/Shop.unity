@@ -779,7 +779,7 @@ MonoBehaviour:
   m_Sprite: {fileID: -6811806853045502961, guid: f5987439b824e5749b317b9dd3c764a1,
     type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -9686,7 +9686,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Money: 100
-  InteractionText: {fileID: 894109404}
   Items: []
   HatRenderer: {fileID: 575182161}
   WeaponRenderer: {fileID: 2046173745}

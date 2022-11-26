@@ -11,8 +11,6 @@ public class Player : MonoBehaviour
 
     public int Money;
 
-    public TextMeshProUGUI InteractionText;
-
     public List<ItemData> Items;
 
     public SpriteRenderer HatRenderer;

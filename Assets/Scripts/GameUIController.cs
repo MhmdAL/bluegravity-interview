@@ -103,4 +103,9 @@ public class GameUIController : MonoBehaviour
             ClosePurchaseMenu();
         }
     }
+
+    private void OnDestroy()
+    {
+        Player.NearestInteractableChanged -= OnNearestInteractableChanged;
+    }
 }
