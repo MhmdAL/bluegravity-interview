@@ -1,35 +1,49 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class GameUIController : MonoBehaviour
 {
-    public Player Player;
+    [SerializeField] private string purchaseButtonUnownedText;
+    [SerializeField] private string purchaseButtonOwnedText;
+    [SerializeField] private string interactionStringFormat;
 
-    public string PurchaseButtonUnownedText;
-    public string PurchaseButtonOwnedText;
-    public string InteractionStringFormat;
+    [SerializeField] private TextMeshProUGUI interactionText;
+    [SerializeField] private TextMeshProUGUI goldText;
 
-    public TextMeshProUGUI InteractionText;
-    public TextMeshProUGUI GoldText;
+    [SerializeField] private Image itemIconImage;
+    [SerializeField] private TextMeshProUGUI itemNameText;
+    [SerializeField] private TextMeshProUGUI itemTypeText;
+    [SerializeField] private TextMeshProUGUI itemPriceText;
 
-    public Image ItemIconImage;
-    public TextMeshProUGUI ItemNameText;
-    public TextMeshProUGUI ItemTypeText;
-    public TextMeshProUGUI ItemPriceText;
+    [SerializeField] private Button purchaseButton;
+    [SerializeField] private TextMeshProUGUI purchaseButtonText;
 
-    public Button PurchaseButton;
-    public TextMeshProUGUI PurchaseButtonText;
+    [SerializeField] private GameObject purchaseMenu;
+    [SerializeField] private GameObject sellMenu;
 
-    public GameObject PurchaseMenu;
+    private List<InventoryItem> _inventoryItems;
+
+    private Player _player;
+
     private ItemData _currentItem;
 
     private void Awake()
     {
-        Player.NearestInteractableChanged += OnNearestInteractableChanged;
+        _player = FindObjectOfType<Player>();
+
+        _player.NearestInteractableChanged += OnNearestInteractableChanged;
+
+        _inventoryItems = sellMenu.GetComponentsInChildren<InventoryItem>().ToList();
+    }
+
+    private void Update()
+    {
+        goldText.text = _player.Money.ToString();
     }
 
     private void OnNearestInteractableChanged(Interactable other)
@@ -39,47 +53,84 @@ public class GameUIController : MonoBehaviour
 
     private void UpdateInteractionText(Interactable interactable)
     {
-        if (interactable != null && PurchaseMenu.activeSelf == false)
+        if (interactable != null && !purchaseMenu.activeSelf && !sellMenu.activeSelf)
         {
-            InteractionText.gameObject.SetActive(true);
-            InteractionText.text = string.Format(InteractionStringFormat, interactable.InteractionDisplayName);
+            interactionText.gameObject.SetActive(true);
+            interactionText.text = string.Format(interactionStringFormat, interactable.InteractionDisplayName);
         }
         else
         {
-            InteractionText.gameObject.SetActive(false);
+            interactionText.gameObject.SetActive(false);
         }
     }
 
-    public void LoadItem(ItemData item)
+    public void UpdateInventoryItems()
+    {
+        _inventoryItems.ForEach(x => x.Reset());
+
+        for (int i = 0; i < _player.Items.Count && i < _inventoryItems.Count; i++)
+        {
+            _inventoryItems[i].LoadItem(_player.Items[i]);
+        }
+    }
+
+    public void LoadSellMenu()
+    {
+        UpdateInventoryItems();
+
+        sellMenu.SetActive(true);
+
+        Time.timeScale = 0;
+
+        UpdateInteractionText(_player.NearestInteractable);
+    }
+
+    public void CloseSellMenu()
+    {
+        sellMenu.SetActive(false);
+
+        UpdateInteractionText(_player.NearestInteractable);
+
+        Time.timeScale = 1;
+    }
+
+    public void OnItemSold(ItemData item)
+    {
+        _player.SellItem(item);
+
+        UpdateInventoryItems();
+    }
+
+    public void OnCloseSellMenuClicked()
+    {
+        CloseSellMenu();
+    }
+
+    public void LoadPurchaseMenu(ItemData item)
     {
         Time.timeScale = 0;
 
         _currentItem = item;
 
-        ItemIconImage.sprite = item.Sprite;
-        ItemNameText.text = item.DisplayName;
-        ItemTypeText.text = item.Type.ToString();
-        ItemPriceText.text = item.Price.ToString();
+        itemIconImage.sprite = item.Sprite;
+        itemNameText.text = item.DisplayName;
+        itemTypeText.text = item.Type.ToString();
+        itemPriceText.text = item.Price.ToString();
 
-        if (Player.Items.Contains(item))
+        if (_player.Items.Contains(item))
         {
-            PurchaseButton.interactable = false;
-            PurchaseButtonText.text = PurchaseButtonOwnedText;
+            purchaseButton.interactable = false;
+            purchaseButtonText.text = purchaseButtonOwnedText;
         }
         else
         {
-            PurchaseButton.interactable = true;
-            PurchaseButtonText.text = PurchaseButtonUnownedText;
+            purchaseButton.interactable = true;
+            purchaseButtonText.text = purchaseButtonUnownedText;
         }
 
-        PurchaseMenu.SetActive(true);
+        purchaseMenu.SetActive(true);
 
-        UpdateInteractionText(Player.NearestInteractable);
-    }
-
-    private void Update()
-    {
-        GoldText.text = Player.Money.ToString();
+        UpdateInteractionText(_player.NearestInteractable);
     }
 
     public void OnClosePurchaseMenuClicked()
@@ -89,16 +140,16 @@ public class GameUIController : MonoBehaviour
 
     private void ClosePurchaseMenu()
     {
-        PurchaseMenu.SetActive(false);
+        purchaseMenu.SetActive(false);
 
-        UpdateInteractionText(Player.NearestInteractable);
+        UpdateInteractionText(_player.NearestInteractable);
 
         Time.timeScale = 1;
     }
 
     public void OnPurchaseItemClicked()
     {
-        if (Player.PurchaseItem(_currentItem))
+        if (_player.PurchaseItem(_currentItem))
         {
             ClosePurchaseMenu();
         }
@@ -106,6 +157,6 @@ public class GameUIController : MonoBehaviour
 
     private void OnDestroy()
     {
-        Player.NearestInteractableChanged -= OnNearestInteractableChanged;
+        _player.NearestInteractableChanged -= OnNearestInteractableChanged;
     }
 }

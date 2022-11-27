@@ -11,10 +11,10 @@ public class Player : MonoBehaviour
 
     public int Money;
 
-    public List<ItemData> Items;
+    public List<ItemData> Items { get; private set; }
 
-    public SpriteRenderer HatRenderer;
-    public SpriteRenderer WeaponRenderer;
+    [SerializeField] private SpriteRenderer hatRenderer;
+    [SerializeField] private SpriteRenderer weaponRenderer;
     private ItemData _currentHat;
     private ItemData _currentWeapon;
 
@@ -34,6 +34,11 @@ public class Player : MonoBehaviour
             if (shouldNotify)
                 NearestInteractableChanged?.Invoke(value);
         }
+    }
+
+    private void Awake()
+    {
+        Items = new List<ItemData>();
     }
 
     private void Update()
@@ -158,17 +163,6 @@ public class Player : MonoBehaviour
         UpdateVisuals();
     }
 
-    public void PurchaseItem(ItemDisplay item)
-    {
-        if (Money >= item.ItemData.Price && !Items.Contains(item.ItemData))
-        {
-            Items.Add(item.ItemData);
-            Money -= item.ItemData.Price;
-
-            Destroy(item.gameObject);
-        }
-    }
-
     public bool PurchaseItem(ItemData item)
     {
         if (Money >= item.Price && !Items.Contains(item))
@@ -182,10 +176,24 @@ public class Player : MonoBehaviour
         return false;
     }
 
+    public void SellItem(ItemData item)
+    {
+        if (Items.Contains(item))
+        {
+            Items.Remove(item);
+            Money += item.Price;
+
+            _currentHat = Items.Contains(_currentHat) ? _currentHat : null;
+            _currentWeapon = Items.Contains(_currentWeapon) ? _currentWeapon : null;
+
+            UpdateVisuals();
+        }
+    }
+
     private void UpdateVisuals()
     {
-        HatRenderer.sprite = _currentHat?.Sprite ?? null;
+        hatRenderer.sprite = _currentHat?.Sprite ?? null;
 
-        WeaponRenderer.sprite = _currentWeapon?.Sprite ?? null;
+        weaponRenderer.sprite = _currentWeapon?.Sprite ?? null;
     }
 }

@@ -6,8 +6,8 @@ using UnityEngine;
 
 public class DialogBox : MonoBehaviour
 {
-    public TextMeshProUGUI DialogText;
-    public TextMeshProUGUI ContinueText;
+    [SerializeField] private TextMeshProUGUI dialogText;
+    [SerializeField] private TextMeshProUGUI continueText;
 
     private DialogData _dialogData;
     private int _currentDialogText;
@@ -18,16 +18,16 @@ public class DialogBox : MonoBehaviour
 
         _dialogData = data;
 
-        DialogText.text = _dialogData?.Dialogs?.FirstOrDefault() ?? "";
+        dialogText.text = _dialogData?.Dialogs?.FirstOrDefault() ?? "";
 
-        ContinueText.text = "Press space to continue";
+        continueText.text = "Press space to continue";
 
         gameObject.SetActive(true);
     }
 
     public void UpdateDialogText()
     {
-        DialogText.text = _dialogData.Dialogs[_currentDialogText];
+        dialogText.text = _dialogData.Dialogs[_currentDialogText];
     }
 
     public void CloseDialog()

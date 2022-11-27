@@ -6,15 +6,14 @@ namespace Cainos.PixelArtTopDown_Basic
 {
     public class TopDownCharacterController : MonoBehaviour
     {
-        public float speed;
+        [SerializeField] private float speed;
 
-        private Animator animator;
+        private Rigidbody2D _rigidBody;
 
         private void Start()
         {
-            // animator = GetComponent<Animator>();
+            _rigidBody = GetComponent<Rigidbody2D>();
         }
-
 
         private void Update()
         {
@@ -22,29 +21,24 @@ namespace Cainos.PixelArtTopDown_Basic
             if (Input.GetKey(KeyCode.A))
             {
                 dir.x = -1;
-                // animator.SetInteger("Direction", 3);
             }
             else if (Input.GetKey(KeyCode.D))
             {
                 dir.x = 1;
-                // animator.SetInteger("Direction", 2);
             }
 
             if (Input.GetKey(KeyCode.W))
             {
                 dir.y = 1;
-                // animator.SetInteger("Direction", 1);
             }
             else if (Input.GetKey(KeyCode.S))
             {
                 dir.y = -1;
-                // animator.SetInteger("Direction", 0);
             }
 
             dir.Normalize();
-            // animator.SetBool("IsMoving", dir.magnitude > 0);
 
-            GetComponent<Rigidbody2D>().velocity = speed * dir;
+            _rigidBody.velocity = speed * dir;
         }
     }
 }
